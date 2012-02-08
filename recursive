@@ -1,0 +1,17 @@
+
+#!/bin/bash
+
+
+for FILE in *
+do
+    if [ -d "$FILE" ] ; then
+       cd "$FILE"
+       /media/video/recursive
+    fi
+
+    if [ ! -d  "$FILE" ] ; then
+       /media/video/spaceforperiod
+    fi
+done
+
+cd ../..

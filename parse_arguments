@@ -1,0 +1,10 @@
+#!/bin/bash
+
+################################
+#        parse_arguments       #
+#     written by Alan Drees    #
+#        February 5 2012       #
+# Helper functions to parse    #
+# command-line arguments, both #
+# gnu-style and old style.     #
+################################

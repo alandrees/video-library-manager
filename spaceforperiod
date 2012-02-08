@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#while read file ; do
+#mv "${file}" "${file// /.}"
+#done
+
+#!/bin/bash
+#TFILE=""
+#for f in `find .`
+#do
+#  TFILE=f
+#  sed "s/ /./g" "$f" > $TFILE && mv $TFILE "$f"
+
+#done
+
+for FILE in *
+
+do
+   # echo "$FILE"
+
+   if [ -d "$FILE" ] ; then
+       cd "$FILE"
+       echo "$FILE"
+       /media/video/spaceforperiod
+       cd ..
+   fi
+   
+   if [ -f "$FILE" ] ; then
+	NEWFILE=`echo "$FILE" | sed 's/ /\./g'`
+	NEWFILE=`echo "$NEWFILE" | sed 's/\.-\./\./g'`
+	#if [ "$FILE" != "$NEWFILE" ] ; then
+	    #NEWFILE=`echo "$NEWFILE" | sed 's/\.[0-9][0-9]*x[0-9][0-9]/\.S
+	    mv "$FILE" "$NEWFILE"
+	#fi
+	echo $FILE
+   fi
+done

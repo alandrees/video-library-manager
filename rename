@@ -1,0 +1,164 @@
+#!/bin/bash
+
+#################################################
+#                    rename                     #
+#             written by Alan Drees             #
+#               February 5, 2012                #
+#                                               #
+#                                               #
+# Script to do somewhat automated renaming of   #
+# television series, with a number of options   #
+# to make it easy to update the files with      #
+# titles, and to standardize all the filenames  #
+#################################################
+
+## includes
+
+source /scripts/common
+## application status flags
+TEST=1
+FIX_FILES_ONLY=0
+TITLE_SOURCE="DIR"
+SINGLE_FILE_MODE=0
+
+EPISODE=S[0-9][0-9]E[0-9][0-9]
+FILES=""
+
+#FILES=$(ls -1Q "$1")
+
+
+
+##useful regexs
+RENAMING_MASK="sed 's/\"h/H/' | sed 's/\.i/\.I/' | sed 's/\.m/.M/g' | sed 's/\.y/.Y/' | sed 's/\.s/.S/' | sed 's/e/E/3g' | sed 's/720.*$//'"
+
+
+#while getopts "sderc:ht" OPTION
+#do
+#    case $OPTION in
+#	"h")
+#	    printf "Usage: rename [options] [file or folder]\n"
+#	    printf "Script to handle renaming, titling and standardizing a video library (mine, in particular).\n"
+#	    printf "\n"
+#	    printf "Options:\n"
+#	    printf "%s       define the title source data.  Valid options are: WEB, DB and DIR.\n" "-s"
+#	    printf "%s       \n" "-d"
+#	    printf "%s       define episode mask (Default is S[0-9][0-9]E[0-9][0-9]).\n" "-e"
+#	    printf "%s       recurisve mode... pipe dream implementation.\n" "-r"
+#	    printf "%s       fix caps and episode designation only.  No Title Updates (-s will be ignored).\n" "-c"
+#	    printf "%s       test the output without modifying the file name.s\n" "-t"
+#	    printf "%s       you clearly already know what this option does...\n" "-h"
+#	    exit 1
+#	    ;;
+#	"s")
+#	    TITLE_SOURCE=$OPTARG
+#	    ;;
+#	"d")
+#	    ;;
+#	"e")
+#	    ;;
+#	"r")
+#	    ;;
+#	"c")
+#	    FIX_FILES_ONLY=1
+#	    ;;
+#	"t")
+#	    TEST=1
+#	    ;;
+#	"*")
+#	    echo yay
+#	    if [ -e $OPTION ]
+#	    then
+#		if [ -f $OPTION ]
+#		then
+#		     SINGLE_FILE_MODE=1
+#		elif [ -d $OPTION ]
+#		then
+#		    SINGLE_FILE_MODE=0
+#		fi
+#		OBJECT=$OPTION
+#	   fi
+#	   ;;
+#   esac
+#done
+
+##test that a list was passed...
+if [ "$OBJECT" == "" ]
+then
+    echo "No files specified. Exiting."
+    exit 1
+fi
+
+##makes sure the title source directory is a valid option, and ignores it if the fix names only flag is set
+if [ $TITLE_SOURCE != "DIR" ] || [ $TITLE_SOURCE != "WEB" ] || [ $TITLE_SOURCE != "DB" ]
+then
+    if [ $FIX_FILES_ONLY -ne 1 ]
+    then
+	echo Bad Title Source
+    fi
+fi
+
+##get the list of titles
+if [ $FIX_NAMES_ONLY -ne 1 ]
+then
+    case $TITLE_SOURCE
+	"DIR")
+	    #TITLE_LIST=`ls -1Q "$2" 
+	    echo directory
+	;;
+	"WEB")
+	    echo web
+	;;
+	"DB")
+	    echo database
+	;;
+    esac
+fi
+
+#change behvaviour based on SINGLE_FILE_MODE
+if [ $SINGLE_FILE_MODE ]
+then
+    $RENAME_LIST = $OBJECT
+    cd $(dirname $OBJECT)
+else
+    $RENAME_LIST = $(ls 1q $OBJECT);
+    cd "$OBJECT"
+fi
+
+TITLE_REGEX="sed 's/^.*E[0-9][0-9].//'"
+EPISODE_NUMBER_REGEX="grep -o [sS][0-9][0-9][eE][0-9][0-9]"
+
+#these are commands parse out the specific season and specific episode from a standardly-formatted designation
+SEASON_REGEX="awk 'BEGIN { FIELDWIDTHS = \"1 2 1 2\" } {print $2}'"
+EPISODE_REGEX="awk 'BEGIN { FIELDWIDTHS = \"1 2 1 2\" } {print $4}'"
+
+
+#cd "$1"
+
+for i in $RENAME_LIST
+
+do
+    EPISODE_NUMBER=$(echo $i | eval $EPISODE_NUMBER_REGEX)
+    #translate episode number depending on TITLE_LIST_SOURCE
+    for x in $TITLE_LIST
+    do
+	if [ "$(echo $x | grep -i $EPISODE_NUMBER)" != "" ]
+	then
+	    EXTENSION=$(echo $i | sed 's/.*\.//')
+	    EX2=$(echo $x | sed 's/.*\.//')
+	    TITLE=$(echo $(echo $x | eval $TITLE_REGEX))
+	    FILENAME=$(echo $(echo $i | eval $RENAMING_MASK)$TITLE.$EXTENSION)
+	    FILENAME=$(echo $FILENAME | sed 's/\"//g')
+	    EX2=$(echo $EX2 | sed 's/\"//g')
+	    FILENAME=$(echo $FILENAME | eval sed 's/\.$EX2//')
+	    break
+	fi
+    done  
+   
+    if [ $TEST ]
+    then
+	echo  mv $(echo $i | sed 's\"//g') $FILENAME
+    else
+	mv $(echo $i | sed 's/\"//g') $FILENAME
+   fi
+
+done
